@@ -713,6 +713,7 @@ _request() {
         ${has_stdin:+--data-binary @-} \
         ${trace_curl:+--trace-ascii /dev/stderr} \
         -X "${method}" \
+	-L \
         "${path}"
     set +x
 }
@@ -2656,6 +2657,63 @@ archive_repo() {
     _format_json "archived=true" \
         | _post "/repos/${repo}" method='PATCH' \
         | _filter_json "$_filter"
+}
+
+list_workflow_run_artifacts() {
+    # List the artifacts of a specified workflow run.
+    # ( https://docs.github.com/en/rest/reference/actions#list-workflow-run-artifacts )
+    #
+    # Usage:
+    #
+    #     list_workflow_run_artifacts user repo run_id
+    #
+    # Positional arguments
+    #
+    #   GitHub user login or id for which owns the workflow run
+    #   Name of the repo for which owns the workflow run
+    #   Id of the workflow run 
+    #
+
+    local user="${1:?User name required.}"
+    local repo="${2:?Repo name required.}"
+    local run_id="${3:?Workflow run id required.}"
+    shift 3
+
+    #   A jq filter to apply to the return data.
+    #
+
+    local _filter='.artifacts[] | "\(.id) \(.name) \(.archive_download_url)"'
+
+    url="/repos/${user}/${repo}/actions/runs/${run_id}/artifacts"
+
+    _get "${url}" | _filter_json "${_filter}"
+}
+
+download_workflow_run_artifact() {
+    # Download the artifact of the specified workflow run.
+    # ( https://docs.github.com/en/rest/reference/actions#download-an-artifact )
+    #
+    # Usage:
+    #
+    #     download_workflow_run_artifact user repo artifact_id
+    #
+    # Positional arguments
+    #
+    #   GitHub user login or id for which to list branches
+    #   Name of the repo for which to list branches
+    #   Id of the artifact to download
+    #
+    # The zip data will be returned to stdout. Redirect to a file or pipe 
+    # to unzip.
+
+    local user="${1:?User name required.}"
+    local repo="${2:?Repo name required.}"
+    local artifact_id="${3:?Artifact id required.}"
+    shift 3
+
+    url="/repos/${user}/${repo}/actions/artifacts/${artifact_id}/zip"
+
+    _get "${url}"
 }
 
 __main "$@"
