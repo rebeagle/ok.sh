@@ -553,6 +553,9 @@ _get_mime_type() {
         *.zip) mime_type=application/zip ;;
         *.jar) mime_type=application/java-archive ;;
         *.war) mime_type=application/zip ;;
+        *.deb) mime_type=application/x-deb ;;
+        *.whl) mime_type=application/zip ;;
+        *.pyz) mime_type=application/zip ;;
     esac
 
     _log debug "Guessed mime type of '${mime_type}' for '${filename}'."
