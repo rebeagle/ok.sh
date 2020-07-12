@@ -772,20 +772,22 @@ _response() {
 
     _log debug 'Processing response.'
 
-    while [ "${status_code}" = "100" ]; do
+    while [ "${status_code}" = "100" -o "${status_code}" = "302" ]; do
         read -r http_version status_code status_text
         status_text="${status_text%${crlf}}"
         http_version="${http_version#HTTP/}"
 
         _log debug "Response status is: ${status_code} ${status_text}"
 
-        if [ "${status_code}" = "100" ]; then
+        if [ "${status_code}" = "100" -o "${status_code}" = "302" ]; then
             _log debug "Ignoring response '${status_code} ${status_text}', skipping to real response."
             while IFS=": " read -r hdr val; do
                 # Headers stop at the first blank line.
                 [ "$hdr" = "$crlf" ] && break
-                val="${val%${crlf}}"
-                _log debug "Unexpected additional header: ${hdr}: ${val}"
+                if [ "${status_code}" = "100" ]; then
+                    val="${val%${crlf}}"
+                    _log debug "Unexpected additional header: ${hdr}: ${val}"
+                fi
             done
 
         fi
@@ -2660,18 +2662,17 @@ archive_repo() {
 }
 
 list_workflow_run_artifacts() {
-    # List the artifacts of a specified workflow run.
-    # ( https://docs.github.com/en/rest/reference/actions#list-workflow-run-artifacts )
+    # List commits of a specified repository.
+    # ( https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository )
     #
     # Usage:
     #
-    #     list_workflow_run_artifacts user repo run_id
+    #     list_commits user repo
     #
     # Positional arguments
     #
-    #   GitHub user login or id for which owns the workflow run
-    #   Name of the repo for which owns the workflow run
-    #   Id of the workflow run 
+    #   GitHub user login or id for which to list branches
+    #   Name of the repo for which to list branches
     #
 
     local user="${1:?User name required.}"
@@ -2690,21 +2691,18 @@ list_workflow_run_artifacts() {
 }
 
 download_workflow_run_artifact() {
-    # Download the artifact of the specified workflow run.
-    # ( https://docs.github.com/en/rest/reference/actions#download-an-artifact )
+    # List commits of a specified repository.
+    # ( https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository )
     #
     # Usage:
     #
-    #     download_workflow_run_artifact user repo artifact_id
+    #     list_commits user repo
     #
     # Positional arguments
     #
     #   GitHub user login or id for which to list branches
     #   Name of the repo for which to list branches
-    #   Id of the artifact to download
     #
-    # The zip data will be returned to stdout. Redirect to a file or pipe 
-    # to unzip.
 
     local user="${1:?User name required.}"
     local repo="${2:?Repo name required.}"
