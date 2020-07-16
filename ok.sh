@@ -716,7 +716,7 @@ _request() {
         ${has_stdin:+--data-binary @-} \
         ${trace_curl:+--trace-ascii /dev/stderr} \
         -X "${method}" \
-	-L \
+        -L \
         "${path}"
     set +x
 }
