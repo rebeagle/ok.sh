@@ -2665,17 +2665,18 @@ archive_repo() {
 }
 
 list_workflow_run_artifacts() {
-    # List commits of a specified repository.
-    # ( https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository )
+    # List the artifacts of a specified workflow run.
+    # ( https://docs.github.com/en/rest/reference/actions#list-workflow-run-artifacts )
     #
     # Usage:
     #
-    #     list_commits user repo
+    #     list_workflow_run_artifacts user repo run_id
     #
     # Positional arguments
     #
-    #   GitHub user login or id for which to list branches
-    #   Name of the repo for which to list branches
+    #   GitHub user login or id for which owns the workflow run
+    #   Name of the repo for which owns the workflow run
+    #   Id of the workflow run 
     #
 
     local user="${1:?User name required.}"
@@ -2694,18 +2695,21 @@ list_workflow_run_artifacts() {
 }
 
 download_workflow_run_artifact() {
-    # List commits of a specified repository.
-    # ( https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository )
+    # Download the artifact of the specified workflow run.
+    # ( https://docs.github.com/en/rest/reference/actions#download-an-artifact )
     #
     # Usage:
     #
-    #     list_commits user repo
+    #     download_workflow_run_artifact user repo artifact_id
     #
     # Positional arguments
     #
     #   GitHub user login or id for which to list branches
     #   Name of the repo for which to list branches
+    #   Id of the artifact to download
     #
+    # The zip data will be returned to stdout. Redirect to a file or pipe 
+    # to unzip.
 
     local user="${1:?User name required.}"
     local repo="${2:?Repo name required.}"
